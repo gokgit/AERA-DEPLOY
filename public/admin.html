@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AERA — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0B0B;--s1:#111;--y:#EEFF00;--r:#FF3A1A;--g:#00FFB2;--p:#9B5CF6;
+  --w:#F0F0E8;--muted:#3A3A3A;--grid:rgba(238,255,0,.035);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Mono',monospace;background:var(--bg);color:var(--w);min-height:100vh}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:9999}
+
+/* NAV */
+.nav{height:52px;background:var(--bg);border-bottom:2.5px solid var(--y);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:5px;color:var(--y);text-shadow:0 0 16px rgba(238,255,0,.4)}
+.nav-badge{font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--r);border:1.5px solid rgba(255,58,26,.3);padding:5px 10px}
+
+/* LOGIN */
+#loginWrap{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 52px);padding:24px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:36px 36px}
+.login-box{border:2.5px solid var(--y);background:var(--s1);width:100%;max-width:380px}
+.lb-top{background:var(--y);padding:14px 20px;border-bottom:2.5px solid #000;display:flex;align-items:center;justify-content:space-between}
+.lb-top h2{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--bg)}
+.lb-body{padding:24px 20px}
+.lb-label{display:block;font-size:.58rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#555;margin-bottom:6px}
+.lb-input{width:100%;background:var(--bg);border:2.5px solid var(--muted);padding:12px 14px;font-family:'Space Mono',monospace;font-size:.8rem;color:var(--w);outline:none;margin-bottom:12px;transition:border-color .15s}
+.lb-input:focus{border-color:var(--y)}
+.lb-btn{width:100%;background:var(--y);color:var(--bg);font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px;border:2.5px solid var(--y);cursor:pointer;transition:background .12s}
+.lb-btn:hover{background:var(--g)}
+.lb-err{font-size:.65rem;color:var(--r);font-weight:700;letter-spacing:1px;margin-top:8px;min-height:16px}
+
+/* DASHBOARD */
+#dashWrap{display:none;padding:20px 16px}
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:2.5px solid var(--y);margin-bottom:20px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+.stat-box{padding:20px 16px;border-right:1.5px solid #222}
+.stat-box:last-child{border-right:none;grid-column:1/-1;border-top:1.5px solid #222}
+.sb-num{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;line-height:1;margin-bottom:4px}
+.sb-label{font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#555}
+
+/* TABLE */
+.tbl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.tbl-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;color:var(--y)}
+.export-btn{background:transparent;color:var(--g);font-family:'Space Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border:2px solid rgba(0,255,178,.3);cursor:pointer;transition:background .12s,color .12s}
+.export-btn:hover{background:var(--g);color:var(--bg)}
+.tbl-wrap{overflow-x:auto;border:2.5px solid var(--y);-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:600px}
+thead tr{background:var(--y)}
+thead th{padding:10px 12px;text-align:left;font-size:.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--bg);border-right:1.5px solid rgba(0,0,0,.15);white-space:nowrap}
+thead th:last-child{border-right:none}
+tbody tr{border-bottom:1.5px solid #1a1a1a;transition:background .1s}
+tbody tr:hover{background:rgba(238,255,0,.04)}
+tbody td{padding:12px 12px;font-size:.65rem;color:#999;border-right:1.5px solid #1a1a1a;word-break:break-all}
+tbody td:first-child{color:var(--y);font-weight:700;font-size:.8rem}
+tbody td:last-child{border-right:none}
+.no-data{padding:40px;text-align:center;font-size:.75rem;color:#333;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.refresh-btn{background:var(--y);color:var(--bg);font-family:'Space Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border:2.5px solid var(--y);cursor:pointer;transition:background .12s}
+.refresh-btn:hover{background:var(--g)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo">AERA</span>
+  <span class="nav-badge">Admin Panel</span>
+</nav>
+
+<!-- LOGIN -->
+<div id="loginWrap">
+  <div class="login-box">
+    <div class="lb-top">
+      <h2>ADMIN ACCESS</h2>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0B0B0B" stroke-width="2" stroke-linecap="square"><rect x="3" y="9" width="14" height="10"/><path d="M7 9V6a3 3 0 016 0v3"/></svg>
+    </div>
+    <div class="lb-body">
+      <label class="lb-label">Admin Password</label>
+      <input type="password" class="lb-input" id="pwInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()">
+      <button class="lb-btn" onclick="login()">ACCESS DASHBOARD →</button>
+      <div class="lb-err" id="loginErr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashWrap">
+  <div class="stats-row">
+    <div class="stat-box"><div class="sb-num" id="dTotal" style="color:var(--y)">—</div><div class="sb-label">Total in Queue</div></div>
+    <div class="stat-box"><div class="sb-num" id="dReal" style="color:var(--g)">—</div><div class="sb-label">Real Sign-ups</div></div>
+    <div class="stat-box"><div class="sb-num" id="dToday" style="color:var(--r)">—</div><div class="sb-label">Joined Today</div></div>
+  </div>
+  <div class="tbl-header">
+    <h3>WAITLIST ENTRIES</h3>
+    <div style="display:flex;gap:8px">
+      <button class="refresh-btn" onclick="loadData()">Refresh</button>
+      <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Name</th><th>Business</th><th>Contact</th><th>Email</th><th>Joined</th>
+        </tr>
+      </thead>
+      <tbody id="tblBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let pw='';
+let allEntries=[];
+
+function login(){
+  pw=document.getElementById('pwInput').value;
+  if(!pw){document.getElementById('loginErr').textContent='Enter a password.';return}
+  loadData(true);
+}
+
+async function loadData(isLogin=false){
+  try{
+    const r=await fetch('/api/admin/list',{headers:{'x-admin-password':pw}});
+    if(!r.ok){
+      if(isLogin)document.getElementById('loginErr').textContent='Incorrect password.';
+      return;
+    }
+    const d=await r.json();
+    allEntries=d.entries;
+    if(isLogin){
+      document.getElementById('loginWrap').style.display='none';
+      document.getElementById('dashWrap').style.display='block';
+    }
+    // Stats
+    document.getElementById('dTotal').textContent=d.total.toLocaleString();
+    document.getElementById('dReal').textContent=d.entries.length.toLocaleString();
+    const today=new Date().toISOString().slice(0,10);
+    const todayCount=d.entries.filter(e=>e.created_at&&e.created_at.startsWith(today)).length;
+    document.getElementById('dToday').textContent=todayCount;
+    // Table
+    const tbody=document.getElementById('tblBody');
+    if(!d.entries.length){
+      tbody.innerHTML='<tr><td colspan="6" class="no-data">No entries yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML=d.entries.map(e=>`
+      <tr>
+        <td>#${e.queue_position}</td>
+        <td>${esc(e.name)}</td>
+        <td>${esc(e.business_name)}</td>
+        <td>${esc(e.contact)}</td>
+        <td>${esc(e.email)}</td>
+        <td style="white-space:nowrap">${e.created_at?e.created_at.slice(0,16).replace('T',' '):'—'}</td>
+      </tr>
+    `).join('');
+  }catch(err){
+    if(isLogin)document.getElementById('loginErr').textContent='Connection error.';
+  }
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function exportCSV(){
+  if(!allEntries.length){alert('No data to export.');return}
+  const h='Position,Name,Business Name,Contact,Email,Joined\n';
+  const rows=allEntries.map(e=>[e.queue_position,e.name,e.business_name,e.contact,e.email,(e.created_at||'').slice(0,16)].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([h+rows],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='aera-waitlist-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
